@@ -42,9 +42,20 @@ def main():
         key = issue["key"]
         summary = issue["fields"]["summary"]
 
+        ticket_detail_url = f"{args.jira_url}/rest/api/2/issue/{key}"
+        detail_response = requests.get(ticket_detail_url, headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/json"
+            })
+        if detail_response.status_code == 200:
+            ticket_data = detail_response.json()
+            description = ticket_data["fields"].get("description", "No details available.")
+        else:
+            description = "Error fetching details."
+        
         ticket_path = os.path.join(tickets_dir, f"{key}.md")
         with open(ticket_path, "w") as t:
-            t.write(f"# {key}\n\n**Summary:** {summary}\n\nMore details can be added here.")
+            t.write(f"# {key}\n\n**Summary:** {summary}\n\n**Details:**\n{description}")
 
         board_columns[status].append(f"- [[{tickets_dir}/{key}|{summary}]]")
 
