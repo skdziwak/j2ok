@@ -1,6 +1,7 @@
 import argparse
 import requests
 import sys
+import os
 from collections import defaultdict
 
 def main():
@@ -8,7 +9,10 @@ def main():
     parser.add_argument('--jira-url', required=True, help="Base URL for Jira, e.g., https://yourcompany.atlassian.net")
     parser.add_argument('--api-token', required=True, help="Jira API token or password")
     parser.add_argument('--outfile', required=True, help="Output markdown file path to overwrite")
+    parser.add_argument('--tickets-dir', default='tickets', help="Directory where each ticket MD file will be created")
     args = parser.parse_args()
+    tickets_dir = args.tickets_dir
+    os.makedirs(tickets_dir, exist_ok=True)
     token = args.api_token
 
     search_url = f"{args.jira_url}/rest/api/2/search"
@@ -38,7 +42,11 @@ def main():
         key = issue["key"]
         summary = issue["fields"]["summary"]
 
-        board_columns[status].append(f"- [{key}] {summary}")
+        ticket_path = os.path.join(tickets_dir, f"{key}.md")
+        with open(ticket_path, "w") as t:
+            t.write(f"# {key}\n\n**Summary:** {summary}\n\nMore details can be added here.")
+
+        board_columns[status].append(f"- [[{tickets_dir}/{key}|{summary}]]")
 
     # Build the kanban board markdown content
     lines = []
