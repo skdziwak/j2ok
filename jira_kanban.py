@@ -4,6 +4,24 @@ import sys
 import os
 from collections import defaultdict
 
+import re
+
+def convert_jira_markup(text):
+    # Convert Jira markup headers to Markdown headers and bold formatting
+    lines = text.splitlines()
+    converted_lines = []
+    for line in lines:
+        if line.startswith("h1. "):
+            line = "# " + line[4:]
+        elif line.startswith("h2. "):
+            line = "## " + line[4:]
+        elif line.startswith("h3. "):
+            line = "### " + line[4:]
+        # Convert bold: *text* to **text**
+        line = re.sub(r'\*(.*?)\*', r'**\1**', line)
+        converted_lines.append(line)
+    return "\n".join(converted_lines)
+
 def main():
     parser = argparse.ArgumentParser(description="Fetch 'Assigned to me' Jira tickets and update an Obsidian MD kanban board")
     parser.add_argument('--jira-url', required=True, help="Base URL for Jira, e.g., https://yourcompany.atlassian.net")
@@ -62,8 +80,9 @@ def main():
             description = "Error fetching details."
         
         ticket_path = os.path.join(tickets_dir, f"{key}.md")
+        converted_description = convert_jira_markup(description)
         with open(ticket_path, "w") as t:
-            t.write(f"# {key}\n\n**Summary:** {summary}\n\n**Details:**\n{description}")
+            t.write(f"# {key}\n\n**Summary:** {summary}\n\n**Details:**\n{converted_description}")
 
         board_columns[status].append(f"- [[{tickets_dir}/{key}|{summary}]]")
 
