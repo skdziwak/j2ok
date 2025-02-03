@@ -33,7 +33,6 @@ def main():
     os.makedirs(tickets_dir, exist_ok=True)
     
     # Clear tickets directory before regeneration
-    import os  # already imported at top, so this is safe to reuse os module
     for file in os.listdir(tickets_dir):
         file_path = os.path.join(tickets_dir, file)
         if os.path.isfile(file_path):
