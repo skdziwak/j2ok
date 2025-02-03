@@ -13,6 +13,14 @@ def main():
     args = parser.parse_args()
     tickets_dir = args.tickets_dir
     os.makedirs(tickets_dir, exist_ok=True)
+    
+    # Clear tickets directory before regeneration
+    import os  # already imported at top, so this is safe to reuse os module
+    for file in os.listdir(tickets_dir):
+        file_path = os.path.join(tickets_dir, file)
+        if os.path.isfile(file_path):
+            os.unlink(file_path)
+    
     token = args.api_token
 
     search_url = f"{args.jira_url}/rest/api/2/search"
