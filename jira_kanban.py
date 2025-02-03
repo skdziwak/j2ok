@@ -33,6 +33,8 @@ def main():
 
     for issue in issues:
         status = issue["fields"]["status"]["name"]
+        if status == "Rejected":
+            continue
         key = issue["key"]
         summary = issue["fields"]["summary"]
 
